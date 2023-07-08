@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-flask-app-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-flask-app
+  template:
+    metadata:
+      labels:
+        app: my-flask-app
+    spec:
+      containers:
+      - name: my-flask-app-container
+        image: elenscode/my-flask-app:latest
+        ports:
+        - containerPort: 5000
+        env:
+        - name: HOST_URL
+          valueFrom:
+            configMapKeyRef:
+              name: my-configmap
+              key: host.url
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-flask-app-service
+spec:
+  type: NodePort
+  ports:
+  - port: 8080
+    targetPort: 5000
+    nodePort: 30008
+  selector:
+    app: my-flask-app
